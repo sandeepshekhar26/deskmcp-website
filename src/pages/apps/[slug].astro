@@ -32,7 +32,7 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
       <div class="app-meta">
         <span>{app.category}</span><span class="sep">&middot;</span>
         <span>{app.platform}</span><span class="sep">&middot;</span>
-        <span class="header-dl"><span class="dot dot-live"></span><span data-dl-count data-repo={repoPath} data-release-tag={app.releaseTag}>&mdash;</span> downloads</span>
+        <span class="header-dl"><span class="dot dot-live"></span><span data-dl-count data-repo={repoPath}>&mdash;</span> downloads</span>
       </div>
       <div class="app-actions">
         <a class="btn btn-brass" href={app.downloadUrl}>&darr; Download for Mac</a>
@@ -124,8 +124,8 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
   </ol>
 
   <div class="specs" data-reveal>
-    <div><span>Version</span><strong>{app.releaseTag}</strong></div>
-    <div><span>Size</span><strong>{sizeMb} MB</strong></div>
+    <div><span>Version</span><strong data-latest-version data-repo={repoPath}>{app.releaseTag}</strong></div>
+    <div><span>Size</span><strong data-latest-size data-repo={repoPath}>{sizeMb} MB</strong></div>
     <div><span>Requires</span><strong>{app.requires}</strong></div>
     <div><span>License</span><strong>{app.license}</strong></div>
   </div>
@@ -134,9 +134,9 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
     <a class="btn btn-brass btn-lg" href={app.downloadUrl} id="download-btn">Download {app.name} for Mac</a>
     <p class="download-meta">
       <span class="dot dot-live"></span>
-      <strong data-dl-count data-repo={repoPath} data-release-tag={app.releaseTag}>&mdash;</strong> downloads &middot; via GitHub Releases
+      <strong data-dl-count data-repo={repoPath}>&mdash;</strong> downloads &middot; via GitHub Releases
     </p>
     <a class="source-link" href={app.repo} target="_blank" rel="noopener">View source on GitHub</a>
-    <p class="checksum">SHA-256: {app.sha256}</p>
+    <p class="checksum" data-checksum hidden>SHA-256: <span data-latest-sha data-repo={repoPath}></span></p>
   </section>
 </Base>

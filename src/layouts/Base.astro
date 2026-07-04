@@ -100,27 +100,46 @@ const catalogApps = appsCollection.map((a) => ({
       });
     </script>
     <script>
+      // Pull live release info from GitHub so the site always reflects the
+      // *latest* release — total downloads, version, size, checksum — without
+      // anyone editing the site per release. One API call per repo.
       (function () {
-        const nodes = document.querySelectorAll('[data-dl-count]');
-        const cache = new Map<string, Promise<number | null>>();
-        nodes.forEach((el) => {
-          const repo = el.getAttribute('data-repo');
-          const tag = el.getAttribute('data-release-tag');
-          if (!repo || !tag) return;
-          const key = `${repo}@${tag}`;
-          if (!cache.has(key)) {
-            cache.set(
-              key,
-              fetch(`https://api.github.com/repos/${repo}/releases/tags/${tag}`)
-                .then((r) => (r.ok ? r.json() : null))
-                .then((d) => (d ? (d.assets || []).reduce((s: number, a: any) => s + (a.download_count || 0), 0) : null))
-                .catch(() => null)
-            );
-          }
-          cache.get(key)!.then((count) => {
-            if (count == null) return;
-            el.textContent = count.toLocaleString();
-          });
+        const repos = new Set<string>();
+        document.querySelectorAll('[data-repo]').forEach((el) => {
+          const r = el.getAttribute('data-repo');
+          if (r) repos.add(r);
+        });
+        repos.forEach((repo) => {
+          fetch(`https://api.github.com/repos/${repo}/releases`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((releases) => {
+              if (!Array.isArray(releases) || !releases.length) return;
+              const total = releases.reduce(
+                (s: number, rel: any) => s + (rel.assets || []).reduce((a: number, x: any) => a + (x.download_count || 0), 0),
+                0
+              );
+              const latest = releases.find((rel: any) => !rel.draft && !rel.prerelease) || releases[0];
+              const dmg = (latest.assets || []).find((a: any) => /\.dmg$/i.test(a.name)) || (latest.assets || [])[0];
+              const shaMatch = latest.body ? String(latest.body).match(/[a-f0-9]{64}/i) : null;
+
+              const sel = (attr: string) =>
+                document.querySelectorAll<HTMLElement>(`[${attr}][data-repo="${repo}"]`);
+
+              sel('data-dl-count').forEach((el) => { el.textContent = total.toLocaleString(); });
+              if (latest.tag_name) sel('data-latest-version').forEach((el) => { el.textContent = latest.tag_name; });
+              if (dmg && dmg.size) {
+                const mb = (dmg.size / (1024 * 1024)).toFixed(1) + ' MB';
+                sel('data-latest-size').forEach((el) => { el.textContent = mb; });
+              }
+              if (shaMatch) {
+                sel('data-latest-sha').forEach((el) => {
+                  el.textContent = shaMatch[0];
+                  const box = el.closest('[data-checksum]') as HTMLElement | null;
+                  if (box) box.hidden = false;
+                });
+              }
+            })
+            .catch(() => {});
         });
       })();
     </script>
