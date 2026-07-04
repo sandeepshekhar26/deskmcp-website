@@ -15,14 +15,16 @@ const repoPath = app.repo.replace('https://github.com/', '');
 const sizeMb = (app.sizeBytes / (1024 * 1024)).toFixed(1);
 const lead = app.pillars[0];
 const rest = app.pillars.slice(1);
-const heroShot = app.screenshots[0];
+// Use a content-rich screenshot as the big hero; the gallery shows the rest.
+const heroShot = app.screenshots.find((s) => s.file === 'request-response.jpg') ?? app.screenshots[0];
+const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
 ---
 <Base title={`${app.name} — ${app.tagline}`} description={app.hero.subhead}>
   <a class="back-link" href="/">&larr; Catalog</a>
 
   <div class="app-header" data-reveal>
     <img class="app-icon" src={app.icon} alt={`${app.name} icon`} />
-    <div>
+    <div class="app-head-main">
       <h1>{app.name}</h1>
       <p class="app-tagline">{app.tagline}</p>
       <p class="app-author">Built by <a href={app.author.url} target="_blank" rel="noopener">{app.author.name}</a></p>
@@ -31,38 +33,19 @@ const heroShot = app.screenshots[0];
         <span>{app.platform}</span><span class="sep">&middot;</span>
         <span class="header-dl"><span class="dot dot-live"></span><span data-dl-count data-repo={repoPath} data-release-tag={app.releaseTag}>&mdash;</span> downloads</span>
       </div>
+      <div class="app-actions">
+        <a class="btn btn-brass" href={app.downloadUrl}>&darr; Download for Mac</a>
+        <a class="btn btn-ghost gh-btn" href={app.repo} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"></path></svg>
+          View on GitHub
+        </a>
+      </div>
     </div>
   </div>
 
-  <div class="app-device" data-reveal>
-    <div class="device-wrap">
-      <div class="window lg">
-        <div class="window-bar">
-          <span class="dots"><i class="d-red"></i><i class="d-yellow"></i><i class="d-green"></i></span>
-          <span class="window-title">{app.name} &mdash; {heroShot.title}</span>
-          <span class="mcp-pill"><span class="dot dot-live"></span>MCP active</span>
-        </div>
-        <div class="window-body">
-          <aside class="win-sidebar">
-            <div class="win-req active"><b>GET</b><span>User Profile</span></div>
-            <div class="win-req"><b>POST</b><span>Create Order</span></div>
-            <div class="win-req"><b>gRPC</b><span>Inventory.Check</span></div>
-            <div class="win-req"><b>k6</b><span>Load Test</span></div>
-          </aside>
-          <div class="win-main">
-            <div class="win-urlbar">
-              <span class="method">GET</span>
-              <span class="url">https://api.example.com/v1/users/me</span>
-              <span class="send">Send</span>
-            </div>
-            <pre class="win-response"><code>{`{
-  `}<span class="k">"id"</span>{`: `}<span class="s">"usr_8f2a"</span>{`,
-  `}<span class="k">"active"</span>{`: `}<span class="n">true</span>{`
-}`}</code></pre>
-            <div class="win-status"><span class="status-ok">200 OK</span> &middot; 84ms &middot; 2/2 assertions passed</div>
-          </div>
-        </div>
-      </div>
+  <div class="app-hero-shot" data-reveal>
+    <div class="shot-frame">
+      <img src={`/screenshots/${app.slug}/${heroShot.file}`} alt={`${app.name} — ${heroShot.title}`} loading="eager" />
     </div>
   </div>
 
@@ -98,19 +81,19 @@ const heroShot = app.screenshots[0];
       <h2>See it in action</h2>
     </div>
     <div class="gallery-stage" id="gallery-stage">
-      {app.screenshots.map((s, i) => (
+      {galleryShots.map((s, i) => (
         <img src={`/screenshots/${app.slug}/${s.file}`} alt={s.title} class={i === 0 ? 'is-active' : ''} data-shot-index={i} loading={i === 0 ? 'eager' : 'lazy'} />
       ))}
     </div>
     <div class="gallery-caption">
       <div class="gallery-caption-text" id="gallery-caption-text">
-        <h4>{app.screenshots[0].title}</h4>
-        <p>{app.screenshots[0].caption}</p>
+        <h4>{galleryShots[0].title}</h4>
+        <p>{galleryShots[0].caption}</p>
       </div>
-      <span class="gallery-caption-tag" id="gallery-caption-tag">{app.screenshots[0].section}</span>
+      <span class="gallery-caption-tag" id="gallery-caption-tag">{galleryShots[0].section}</span>
     </div>
     <div class="gallery-thumbs" id="gallery-thumbs">
-      {app.screenshots.map((s, i) => (
+      {galleryShots.map((s, i) => (
         <button class={'gallery-thumb' + (i === 0 ? ' is-active' : '')} type="button" data-thumb-index={i} aria-label={s.title}>
           <img src={`/screenshots/${app.slug}/${s.file}`} alt="" loading="lazy" />
         </button>
@@ -179,4 +162,4 @@ const heroShot = app.screenshots[0];
     });
   });
 </script>
-<script type="application/json" id="shots-data" set:html={JSON.stringify(app.screenshots)} />
+<script type="application/json" id="shots-data" set:html={JSON.stringify(galleryShots)} />

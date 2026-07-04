@@ -1361,3 +1361,325 @@ kbd {
   color: var(--mist);
   font-size: 0.85rem;
 }
+
+/* ================= marketplace hero (compact, marketplace-first) ================= */
+.marketplace-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(3rem, 7vw, 5rem) 0 clamp(2.5rem, 5vw, 3.75rem);
+  margin: 0 calc(clamp(1.25rem, 4vw, 2.5rem) * -1);
+  padding-left: clamp(1.25rem, 4vw, 2.5rem);
+  padding-right: clamp(1.25rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.marketplace-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+}
+
+.marketplace-hero h1 {
+  font-size: clamp(2.1rem, 4.4vw, 3.1rem);
+  line-height: 1.07;
+}
+
+.marketplace-hero .lede {
+  max-width: 54ch;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+}
+
+.chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--mist);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
+  background: color-mix(in srgb, var(--panel) 60%, transparent);
+  white-space: nowrap;
+}
+
+.chip-signal {
+  color: var(--signal);
+  border-color: rgba(var(--signal-rgb), 0.35);
+  background: rgba(var(--signal-rgb), 0.1);
+}
+
+/* CSS light-rays backdrop — a lean, dependency-free take on the LightRays look */
+.light-rays {
+  position: absolute;
+  left: 50%;
+  top: -30%;
+  width: 150%;
+  height: 150%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: conic-gradient(
+    from 180deg at 50% 0%,
+    transparent 0deg,
+    rgba(var(--brass-rgb), 0.55) 3deg,
+    transparent 8deg,
+    transparent 15deg,
+    rgba(var(--signal-rgb), 0.4) 19deg,
+    transparent 24deg,
+    transparent 33deg,
+    rgba(var(--brass-rgb), 0.42) 38deg,
+    transparent 44deg,
+    transparent 315deg,
+    rgba(var(--signal-rgb), 0.4) 321deg,
+    transparent 326deg,
+    transparent 335deg,
+    rgba(var(--brass-rgb), 0.5) 340deg,
+    transparent 345deg,
+    transparent 352deg,
+    rgba(var(--signal-rgb), 0.4) 356deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(115% 75% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.45) 32%, transparent 68%);
+  mask: radial-gradient(115% 75% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.45) 32%, transparent 68%);
+  opacity: 0.5;
+  filter: blur(3px);
+  transform-origin: 50% 0%;
+}
+
+[data-theme='light'] .light-rays {
+  opacity: 0.24;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .light-rays {
+    animation: rayDrift 18s ease-in-out infinite alternate;
+  }
+  @keyframes rayDrift {
+    from {
+      transform: translateX(-50%) rotate(-3.5deg) scale(1);
+    }
+    to {
+      transform: translateX(-50%) rotate(3.5deg) scale(1.06);
+    }
+  }
+}
+
+/* ================= electric border (vanilla port) ================= */
+.electric-border {
+  --electric-light-color: oklch(from var(--electric-border-color) l c h);
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+}
+.eb-canvas-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.eb-canvas {
+  display: block;
+}
+.eb-content {
+  position: relative;
+  border-radius: inherit;
+  z-index: 1;
+}
+.eb-layers {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+.eb-glow-1,
+.eb-glow-2,
+.eb-background-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+.eb-glow-1 {
+  border: 2px solid oklch(from var(--electric-border-color) l c h / 0.6);
+  filter: blur(1px);
+}
+.eb-glow-2 {
+  border: 2px solid var(--electric-light-color);
+  filter: blur(4px);
+}
+.eb-background-glow {
+  z-index: -1;
+  transform: scale(1.05);
+  filter: blur(26px);
+  opacity: 0.22;
+  background: linear-gradient(-30deg, var(--electric-light-color), transparent, var(--electric-border-color));
+}
+
+/* ================= featured catalogue card ================= */
+.featured-wrap {
+  margin-bottom: 1.75rem;
+}
+
+.featured-card {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: inherit;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.25s var(--ease);
+}
+.featured-card:hover {
+  border-color: rgba(var(--signal-rgb), 0.4);
+}
+
+.featured-media {
+  position: relative;
+  background: var(--panel-2);
+  min-height: 260px;
+  overflow: hidden;
+}
+.featured-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+  transition: transform 0.6s var(--ease);
+}
+.featured-card:hover .featured-media img {
+  transform: scale(1.03);
+}
+
+.featured-body {
+  padding: clamp(1.5rem, 2.6vw, 2.3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.featured-id {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.featured-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  flex: 0 0 auto;
+}
+.featured-id h3 {
+  font-size: 1.3rem;
+}
+.featured-tag {
+  color: var(--mist);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+.featured-desc {
+  color: var(--mist);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.featured-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.featured-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+}
+.featured-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--mist);
+  font-variant-numeric: tabular-nums;
+}
+.featured-cta {
+  font-weight: 650;
+  color: var(--brass);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 720px) {
+  .featured-card {
+    grid-template-columns: 1fr;
+  }
+  .featured-media {
+    min-height: 200px;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* coming-soon row under the featured card */
+.coming-soon-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+/* ================= product page: real screenshot hero + actions ================= */
+.app-head-main {
+  min-width: 0;
+  flex: 1;
+}
+.app-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.25rem;
+}
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gh-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.app-hero-shot {
+  position: relative;
+  padding-bottom: 3.5rem;
+}
+.app-hero-shot::before {
+  content: '';
+  position: absolute;
+  inset: -6% 8% 20%;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(var(--brass-rgb), 0.18), transparent 62%);
+  filter: blur(28px);
+}
+.shot-frame {
+  position: relative;
+  z-index: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 40px 80px -32px rgba(var(--shadow-rgb), var(--shadow-strong));
+  background: var(--panel);
+}
+.shot-frame img {
+  width: 100%;
+  display: block;
+}
