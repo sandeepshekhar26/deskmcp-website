@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import ScrollStack from '../../components/ScrollStack.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -80,25 +81,26 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
     <div class="section-head">
       <h2>See it in action</h2>
     </div>
-    <div class="gallery-stage" id="gallery-stage">
+    <ScrollStack>
       {galleryShots.map((s, i) => (
-        <img src={`/screenshots/${app.slug}/${s.file}`} alt={s.title} class={i === 0 ? 'is-active' : ''} data-shot-index={i} loading={i === 0 ? 'eager' : 'lazy'} />
+        <div class="scroll-stack-card stack-card">
+          <div class="stack-card-media">
+            <img src={`/screenshots/${app.slug}/${s.file}`} alt={`${app.name} — ${s.title}`} loading={i < 2 ? 'eager' : 'lazy'} />
+          </div>
+          <div class="stack-card-cap">
+            <div>
+              <h4>{s.title}</h4>
+              <p>{s.caption}</p>
+            </div>
+            <span class="stack-card-tag">{s.section}</span>
+          </div>
+        </div>
       ))}
-    </div>
-    <div class="gallery-caption">
-      <div class="gallery-caption-text" id="gallery-caption-text">
-        <h4>{galleryShots[0].title}</h4>
-        <p>{galleryShots[0].caption}</p>
-      </div>
-      <span class="gallery-caption-tag" id="gallery-caption-tag">{galleryShots[0].section}</span>
-    </div>
-    <div class="gallery-thumbs" id="gallery-thumbs">
-      {galleryShots.map((s, i) => (
-        <button class={'gallery-thumb' + (i === 0 ? ' is-active' : '')} type="button" data-thumb-index={i} aria-label={s.title}>
-          <img src={`/screenshots/${app.slug}/${s.file}`} alt="" loading="lazy" />
-        </button>
-      ))}
-    </div>
+    </ScrollStack>
+    <p class="scroll-stack-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+      Scroll inside the frame to flip through all {galleryShots.length} screenshots
+    </p>
   </section>
 
   <blockquote class="positioning" data-reveal>{app.positioningQuote}</blockquote>
@@ -138,28 +140,3 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
     <p class="checksum">SHA-256: {app.sha256}</p>
   </section>
 </Base>
-
-<script>
-  const stage = document.getElementById('gallery-stage');
-  const thumbs = document.getElementById('gallery-thumbs');
-  const captionText = document.getElementById('gallery-caption-text');
-  const captionTag = document.getElementById('gallery-caption-tag');
-  const shotsData = JSON.parse(document.getElementById('shots-data')?.textContent || '[]');
-
-  thumbs?.querySelectorAll('.gallery-thumb').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const idx = btn.getAttribute('data-thumb-index');
-      thumbs.querySelectorAll('.gallery-thumb').forEach((b) => b.classList.remove('is-active'));
-      btn.classList.add('is-active');
-      stage?.querySelectorAll('img').forEach((img) => {
-        img.classList.toggle('is-active', img.getAttribute('data-shot-index') === idx);
-      });
-      const shot = shotsData[Number(idx)];
-      if (shot && captionText && captionTag) {
-        captionText.innerHTML = `<h4>${shot.title}</h4><p>${shot.caption}</p>`;
-        captionTag.textContent = shot.section;
-      }
-    });
-  });
-</script>
-<script type="application/json" id="shots-data" set:html={JSON.stringify(galleryShots)} />

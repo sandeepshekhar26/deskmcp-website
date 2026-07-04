@@ -1096,6 +1096,107 @@ kbd {
   border-color: var(--brass);
 }
 
+/* ---------- scroll-stack screenshot navigator ---------- */
+.scroll-stack-scroller {
+  position: relative;
+  width: 100%;
+  height: min(78vh, 760px);
+  overflow-y: auto;
+  overflow-x: visible;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 18px;
+  border: 1px solid var(--hairline);
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(var(--brass-rgb), 0.06), transparent 60%),
+    var(--ink);
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+.scroll-stack-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-stack-scroller::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 8px;
+}
+/* Default (no JS / reduced motion): a plain vertical scroll list. */
+.scroll-stack-inner {
+  padding: 1.5rem;
+}
+/* JS adds .ss-active once the stacking effect is running. */
+.scroll-stack-scroller.ss-active .scroll-stack-inner {
+  padding: 9rem 1.5rem 26rem;
+}
+.scroll-stack-end {
+  width: 100%;
+  height: 1px;
+}
+
+.stack-card {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 24px 55px -28px rgba(var(--shadow-rgb), var(--shadow-strong));
+  transform-origin: top center;
+  backface-visibility: hidden;
+}
+.stack-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 46vh;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.stack-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.stack-card-cap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1.15rem;
+  border-top: 1px solid var(--hairline);
+}
+.stack-card-cap h4 {
+  font-size: 0.98rem;
+  margin-bottom: 0.25rem;
+}
+.stack-card-cap p {
+  font-size: 0.82rem;
+  color: var(--mist);
+  line-height: 1.5;
+  max-width: 62ch;
+}
+.stack-card-tag {
+  flex: 0 0 auto;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--brass);
+  font-weight: 700;
+  white-space: nowrap;
+  padding-top: 0.15rem;
+}
+.scroll-stack-hint {
+  margin-top: 0.85rem;
+  font-size: 0.8rem;
+  color: var(--mist);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 /* ---------- positioning quote ---------- */
 .positioning {
   margin: 0 0 3.5rem;

@@ -1,0 +1,195 @@
+---
+// Vanilla port of the React Bits <ScrollStack /> — cards pin & stack as you
+// scroll a contained region. Framework-free for the Astro static site.
+// Progressive enhancement: without JS (or under reduced-motion) the same markup
+// is just a normal vertical scroll list.
+interface Props {
+  class?: string;
+  itemDistance?: number;
+  itemScale?: number;
+  itemStackDistance?: number;
+  stackPosition?: string;
+  scaleEndPosition?: string;
+  baseScale?: number;
+  rotationAmount?: number;
+  blurAmount?: number;
+}
+const {
+  class: className = '',
+  itemDistance = 40,
+  itemScale = 0.02,
+  itemStackDistance = 24,
+  stackPosition = '18%',
+  scaleEndPosition = '8%',
+  baseScale = 0.86,
+  rotationAmount = 0,
+  blurAmount = 2,
+} = Astro.props;
+---
+<div
+  class:list={['scroll-stack-scroller', className]}
+  data-item-distance={itemDistance}
+  data-item-scale={itemScale}
+  data-item-stack-distance={itemStackDistance}
+  data-stack-position={stackPosition}
+  data-scale-end-position={scaleEndPosition}
+  data-base-scale={baseScale}
+  data-rotation-amount={rotationAmount}
+  data-blur-amount={blurAmount}
+>
+  <div class="scroll-stack-inner">
+    <slot />
+    <div class="scroll-stack-end"></div>
+  </div>
+</div>
+
+<script>
+  import Lenis from 'lenis';
+
+  function initScrollStack(scroller: HTMLElement) {
+    if ((scroller as any).__ssInit) return;
+    const cards = Array.from(scroller.querySelectorAll<HTMLElement>('.scroll-stack-card'));
+    if (!cards.length) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      // Leave the plain vertical scroll list as-is; no pinning, no smooth scroll.
+      return;
+    }
+    (scroller as any).__ssInit = true;
+    scroller.classList.add('ss-active');
+
+    const d = scroller.dataset;
+    const itemDistance = parseFloat(d.itemDistance || '40');
+    const itemScale = parseFloat(d.itemScale || '0.02');
+    const itemStackDistance = parseFloat(d.itemStackDistance || '24');
+    const stackPosition = d.stackPosition || '18%';
+    const scaleEndPosition = d.scaleEndPosition || '8%';
+    const baseScale = parseFloat(d.baseScale || '0.86');
+    const rotationAmount = parseFloat(d.rotationAmount || '0');
+    const blurAmount = parseFloat(d.blurAmount || '2');
+
+    const inner = scroller.querySelector<HTMLElement>('.scroll-stack-inner')!;
+    const endEl = scroller.querySelector<HTMLElement>('.scroll-stack-end');
+    const lastTransforms = new Map<number, any>();
+    let isUpdating = false;
+    let lenis: any = null;
+
+    const calcProgress = (scrollTop: number, start: number, end: number) => {
+      if (scrollTop < start) return 0;
+      if (scrollTop > end) return 1;
+      return (scrollTop - start) / (end - start);
+    };
+    const parsePct = (value: string, h: number) => {
+      if (typeof value === 'string' && value.includes('%')) return (parseFloat(value) / 100) * h;
+      return parseFloat(value);
+    };
+    const offsetTop = (el: HTMLElement) => el.offsetTop;
+
+    function update() {
+      if (!cards.length || isUpdating) return;
+      isUpdating = true;
+
+      const scrollTop = scroller.scrollTop;
+      const containerHeight = scroller.clientHeight;
+      const stackPositionPx = parsePct(stackPosition, containerHeight);
+      const scaleEndPositionPx = parsePct(scaleEndPosition, containerHeight);
+      const endElementTop = endEl ? offsetTop(endEl) : 0;
+
+      cards.forEach((card, i) => {
+        if (!card) return;
+        const cardTop = offsetTop(card);
+        const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
+        const triggerEnd = cardTop - scaleEndPositionPx;
+        const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
+        const pinEnd = endElementTop - containerHeight / 2;
+
+        const scaleProgress = calcProgress(scrollTop, triggerStart, triggerEnd);
+        const targetScale = baseScale + i * itemScale;
+        const scale = 1 - scaleProgress * (1 - targetScale);
+        const rotation = rotationAmount ? i * rotationAmount * scaleProgress : 0;
+
+        let blur = 0;
+        if (blurAmount) {
+          let topCardIndex = 0;
+          for (let j = 0; j < cards.length; j++) {
+            const jCardTop = offsetTop(cards[j]);
+            const jTriggerStart = jCardTop - stackPositionPx - itemStackDistance * j;
+            if (scrollTop >= jTriggerStart) topCardIndex = j;
+          }
+          if (i < topCardIndex) blur = Math.max(0, (topCardIndex - i) * blurAmount);
+        }
+
+        let translateY = 0;
+        const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
+        if (isPinned) translateY = scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
+        else if (scrollTop > pinEnd) translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
+
+        const nt = {
+          translateY: Math.round(translateY * 100) / 100,
+          scale: Math.round(scale * 1000) / 1000,
+          rotation: Math.round(rotation * 100) / 100,
+          blur: Math.round(blur * 100) / 100,
+        };
+        const lt = lastTransforms.get(i);
+        const changed =
+          !lt ||
+          Math.abs(lt.translateY - nt.translateY) > 0.1 ||
+          Math.abs(lt.scale - nt.scale) > 0.001 ||
+          Math.abs(lt.rotation - nt.rotation) > 0.1 ||
+          Math.abs(lt.blur - nt.blur) > 0.1;
+        if (changed) {
+          card.style.transform = `translate3d(0, ${nt.translateY}px, 0) scale(${nt.scale}) rotate(${nt.rotation}deg)`;
+          card.style.filter = nt.blur > 0 ? `blur(${nt.blur}px)` : '';
+          lastTransforms.set(i, nt);
+        }
+      });
+
+      isUpdating = false;
+    }
+
+    cards.forEach((card, i) => {
+      if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
+      card.style.willChange = 'transform, filter';
+      card.style.transformOrigin = 'top center';
+      card.style.backfaceVisibility = 'hidden';
+    });
+
+    try {
+      lenis = new Lenis({
+        wrapper: scroller,
+        content: inner,
+        duration: 1.2,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        touchMultiplier: 2,
+        wheelMultiplier: 1,
+        lerp: 0.1,
+        syncTouch: true,
+        syncTouchLerp: 0.075,
+      });
+    } catch (e) {
+      // Fall back to the plain scroll list if lenis can't start.
+      console.warn('ScrollStack: lenis init failed, using plain list.', e);
+      scroller.classList.remove('ss-active');
+      (scroller as any).__ssInit = false;
+      cards.forEach((c) => { c.style.marginBottom = ''; });
+      return;
+    }
+    lenis.on('scroll', update);
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+    // Also update on native scroll as a safety net for the pin math.
+    scroller.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLElement>('.scroll-stack-scroller').forEach(initScrollStack);
+  }
+  if (document.readyState !== 'loading') initAll();
+  else document.addEventListener('DOMContentLoaded', initAll);
+</script>
