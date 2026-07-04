@@ -1,6 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import ElectricBorder from '../components/ElectricBorder.astro';
+import Hero from '../components/Hero.tsx';
+import Marquee from '../components/Marquee.tsx';
+import '../styles/tailwind.css';
 import { getCollection } from 'astro:content';
 
 const apps = await getCollection('apps');
@@ -11,27 +14,12 @@ const repoPath = auk.repo.replace('https://github.com/', '');
   title="Desktop app marketplace — native Mac apps built to be driven"
   description="A small, curated store for native macOS apps that ship as a real .dmg and speak MCP — so you, or your AI agent, can drive them. No web wrappers, no accounts, no lock-in."
 >
-  <section class="marketplace-hero">
-    <div class="marketplace-hero-inner">
-      <p class="eyebrow boot-item boot-1">Desktop app marketplace</p>
-      <h1 class="boot-item boot-2">Native Mac apps,<br>built to be driven.</h1>
-      <p class="lede boot-item boot-2">
-        A small, curated store for native macOS tools that ship as a real <code>.dmg</code> and speak MCP —
-        so you, or your AI agent, can drive them. No web wrappers, no accounts, no lock-in.
-      </p>
-      <div class="hero-badges boot-item boot-3">
-        <span class="chip chip-signal">MCP-native</span>
-        <span class="chip">Real .dmg downloads</span>
-        <span class="chip">No account wall</span>
-        <span class="chip">macOS</span>
-      </div>
-      <div class="hero-actions boot-item boot-3">
-        <a class="btn btn-brass" href="#catalog">Browse the catalog &darr;</a>
-      </div>
-    </div>
-  </section>
+  <div style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+    <Hero client:load />
+    <Marquee />
+  </div>
 
-  <section id="catalog" class="catalog" style="padding-top:clamp(2.5rem,5vw,3.5rem)">
+  <section id="catalog" class="catalog" style="padding-top:clamp(3rem,6vw,4.5rem)">
     <div class="section-head" data-reveal>
       <h2>The catalog</h2>
       <p class="catalog-count">1 app live today &mdash; the shelf is filling up</p>
