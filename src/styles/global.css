@@ -1243,6 +1243,23 @@ kbd {
   font-size: 0.85rem;
 }
 
+.footer-support {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--mist);
+}
+
+.footer-support a {
+  color: var(--brass);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease);
+}
+
+.footer-support a:hover {
+  border-bottom-color: var(--brass);
+}
+
 /* ---------- section heading ---------- */
 .section-head {
   margin-bottom: 1.5rem;
