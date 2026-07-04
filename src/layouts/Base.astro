@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
+import LiquidEther from '../components/LiquidEther.astro';
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -32,13 +33,15 @@ const catalogApps = appsCollection.map((a) => ({
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script is:inline>
       (function () {
+        // Dark is the default; a user's explicit choice is remembered.
         var stored = localStorage.getItem('theme');
-        var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        var theme = stored === 'light' || stored === 'dark' ? stored : 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
   </head>
   <body>
+    <LiquidEther />
     <div class="app-shell">
       <Header />
       <main>
