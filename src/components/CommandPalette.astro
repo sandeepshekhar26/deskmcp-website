@@ -1,0 +1,93 @@
+---
+interface AppEntry {
+  name: string;
+  slug: string;
+  tagline: string;
+  icon: string;
+}
+interface Props {
+  apps: AppEntry[];
+}
+const { apps } = Astro.props;
+---
+<div class="cmdk-overlay" id="cmdk-overlay" hidden>
+  <div class="cmdk-panel" role="dialog" aria-label="Search the catalog">
+    <div class="cmdk-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input class="cmdk-input" id="cmdk-input" type="text" placeholder="Search apps…" autocomplete="off" />
+      <span class="cmdk-esc">ESC</span>
+    </div>
+    <div class="cmdk-list" id="cmdk-list"></div>
+  </div>
+</div>
+
+<script type="application/json" id="cmdk-catalog" set:html={JSON.stringify(apps)} />
+
+<script>
+  const CATALOG = JSON.parse(document.getElementById('cmdk-catalog')!.textContent || '[]');
+  const overlay = document.getElementById('cmdk-overlay') as HTMLElement;
+  const cmdkInput = document.getElementById('cmdk-input') as HTMLInputElement;
+  const cmdkList = document.getElementById('cmdk-list') as HTMLElement;
+  let activeIndex = 0;
+
+  function renderCmdk(query: string) {
+    const q = (query || '').toLowerCase();
+    const matches = CATALOG.filter((item: any) => item.name.toLowerCase().includes(q) || item.tagline.toLowerCase().includes(q));
+    cmdkList.innerHTML = '';
+    if (!matches.length) {
+      const empty = document.createElement('div');
+      empty.className = 'cmdk-empty';
+      empty.textContent = `No apps match "${query}"`;
+      cmdkList.appendChild(empty);
+      return;
+    }
+    matches.forEach((item: any, i: number) => {
+      const row = document.createElement('a');
+      row.href = `/apps/${item.slug}`;
+      row.className = 'cmdk-item' + (i === activeIndex ? ' is-active' : '');
+      row.innerHTML = `<img src="${item.icon}" alt="" /><span>${item.name}</span><span class="cmdk-item-tag">${item.tagline}</span>`;
+      cmdkList.appendChild(row);
+    });
+  }
+
+  function openCmdk() {
+    overlay.hidden = false;
+    cmdkInput.value = '';
+    activeIndex = 0;
+    renderCmdk('');
+    setTimeout(() => cmdkInput.focus(), 0);
+  }
+  function closeCmdk() {
+    overlay.hidden = true;
+  }
+
+  document.getElementById('open-cmdk')?.addEventListener('click', openCmdk);
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) closeCmdk();
+  });
+  cmdkInput?.addEventListener('input', () => {
+    activeIndex = 0;
+    renderCmdk(cmdkInput.value);
+  });
+  cmdkInput?.addEventListener('keydown', (e) => {
+    const items = cmdkList.querySelectorAll('.cmdk-item');
+    if (e.key === 'Enter') {
+      const active = cmdkList.querySelector('.cmdk-item.is-active') as HTMLElement | null;
+      active?.click();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!items.length) return;
+      activeIndex = (activeIndex + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      renderCmdk(cmdkInput.value);
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openCmdk();
+    } else if (e.key === 'Escape' && overlay && !overlay.hidden) {
+      closeCmdk();
+    }
+  });
+</script>

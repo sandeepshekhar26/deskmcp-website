@@ -1,0 +1,182 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return apps.map((app) => ({
+    params: { slug: app.data.slug },
+    props: { app: app.data },
+  }));
+}
+
+const { app } = Astro.props;
+const repoPath = app.repo.replace('https://github.com/', '');
+const sizeMb = (app.sizeBytes / (1024 * 1024)).toFixed(1);
+const lead = app.pillars[0];
+const rest = app.pillars.slice(1);
+const heroShot = app.screenshots[0];
+---
+<Base title={`${app.name} — ${app.tagline}`} description={app.hero.subhead}>
+  <a class="back-link" href="/">&larr; Catalog</a>
+
+  <div class="app-header" data-reveal>
+    <img class="app-icon" src={app.icon} alt={`${app.name} icon`} />
+    <div>
+      <h1>{app.name}</h1>
+      <p class="app-tagline">{app.tagline}</p>
+      <p class="app-author">Built by <a href={app.author.url} target="_blank" rel="noopener">{app.author.name}</a></p>
+      <div class="app-meta">
+        <span>{app.category}</span><span class="sep">&middot;</span>
+        <span>{app.platform}</span><span class="sep">&middot;</span>
+        <span class="header-dl"><span class="dot dot-live"></span><span data-dl-count data-repo={repoPath} data-release-tag={app.releaseTag}>&mdash;</span> downloads</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-device" data-reveal>
+    <div class="device-wrap">
+      <div class="window lg">
+        <div class="window-bar">
+          <span class="dots"><i class="d-red"></i><i class="d-yellow"></i><i class="d-green"></i></span>
+          <span class="window-title">{app.name} &mdash; {heroShot.title}</span>
+          <span class="mcp-pill"><span class="dot dot-live"></span>MCP active</span>
+        </div>
+        <div class="window-body">
+          <aside class="win-sidebar">
+            <div class="win-req active"><b>GET</b><span>User Profile</span></div>
+            <div class="win-req"><b>POST</b><span>Create Order</span></div>
+            <div class="win-req"><b>gRPC</b><span>Inventory.Check</span></div>
+            <div class="win-req"><b>k6</b><span>Load Test</span></div>
+          </aside>
+          <div class="win-main">
+            <div class="win-urlbar">
+              <span class="method">GET</span>
+              <span class="url">https://api.example.com/v1/users/me</span>
+              <span class="send">Send</span>
+            </div>
+            <pre class="win-response"><code>{`{
+  `}<span class="k">"id"</span>{`: `}<span class="s">"usr_8f2a"</span>{`,
+  `}<span class="k">"active"</span>{`: `}<span class="n">true</span>{`
+}`}</code></pre>
+            <div class="win-status"><span class="status-ok">200 OK</span> &middot; 84ms &middot; 2/2 assertions passed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="pillars">
+    <article class="pillar pillar-lead" data-reveal>
+      <div class="pillar-lead-copy">
+        <span class="pillar-glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"></rect><path d="M6 9l3 3-3 3"></path><line x1="11" y1="15" x2="16" y2="15"></line></svg>
+        </span>
+        <h3>{lead.title}</h3>
+        <p>{lead.description}</p>
+      </div>
+      {lead.snippet && <div class="mono-snippet">{lead.snippet}</div>}
+    </article>
+    <div class="pillars-grid" data-reveal-group>
+      {rest.map((p, i) => (
+        <article class="pillar" data-reveal style={`--reveal-index: ${i}`}>
+          <span class="pillar-glyph">
+            {i === 0 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>}
+            {i === 1 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15a8 8 0 1 1 16 0"></path><line x1="12" y1="15" x2="16" y2="10"></line><circle cx="12" cy="15" r="1"></circle></svg>}
+            {i === 2 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"></circle><circle cx="6" cy="6" r="2.2"></circle><circle cx="18" cy="10" r="2.2"></circle><path d="M6 8.2V15.8"></path><path d="M6 8.2c0 3.5 3 3.8 6 3.8h4"></path></svg>}
+          </span>
+          <h3>{p.title}</h3>
+          <p>{p.description}</p>
+          {p.snippet && <div class="mono-snippet" style="text-align:left;margin-top:1rem">{p.snippet}</div>}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="gallery" data-reveal>
+    <div class="section-head">
+      <h2>See it in action</h2>
+    </div>
+    <div class="gallery-stage" id="gallery-stage">
+      {app.screenshots.map((s, i) => (
+        <img src={`/screenshots/${app.slug}/${s.file}`} alt={s.title} class={i === 0 ? 'is-active' : ''} data-shot-index={i} loading={i === 0 ? 'eager' : 'lazy'} />
+      ))}
+    </div>
+    <div class="gallery-caption">
+      <div class="gallery-caption-text" id="gallery-caption-text">
+        <h4>{app.screenshots[0].title}</h4>
+        <p>{app.screenshots[0].caption}</p>
+      </div>
+      <span class="gallery-caption-tag" id="gallery-caption-tag">{app.screenshots[0].section}</span>
+    </div>
+    <div class="gallery-thumbs" id="gallery-thumbs">
+      {app.screenshots.map((s, i) => (
+        <button class={'gallery-thumb' + (i === 0 ? ' is-active' : '')} type="button" data-thumb-index={i} aria-label={s.title}>
+          <img src={`/screenshots/${app.slug}/${s.file}`} alt="" loading="lazy" />
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <blockquote class="positioning" data-reveal>{app.positioningQuote}</blockquote>
+
+  <section class="feature-categories" data-reveal-group>
+    {app.fullFeatureList.map((cat, i) => (
+      <div class="feature-category" data-reveal style={`--reveal-index: ${i}`}>
+        <h4>{cat.category}</h4>
+        <ul>
+          {cat.items.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <div class="section-head" data-reveal>
+    <h2>Install</h2>
+  </div>
+  <ol class="install-steps" data-reveal>
+    {app.installSteps.map((step) => <li>{step}</li>)}
+  </ol>
+
+  <div class="specs" data-reveal>
+    <div><span>Version</span><strong>{app.releaseTag}</strong></div>
+    <div><span>Size</span><strong>{sizeMb} MB</strong></div>
+    <div><span>Requires</span><strong>{app.requires}</strong></div>
+    <div><span>License</span><strong>{app.license}</strong></div>
+  </div>
+
+  <section class="download-cta" data-reveal>
+    <a class="btn btn-brass btn-lg" href={app.downloadUrl} id="download-btn">Download {app.name} for Mac</a>
+    <p class="download-meta">
+      <span class="dot dot-live"></span>
+      <strong data-dl-count data-repo={repoPath} data-release-tag={app.releaseTag}>&mdash;</strong> downloads &middot; via GitHub Releases
+    </p>
+    <a class="source-link" href={app.repo} target="_blank" rel="noopener">View source on GitHub</a>
+    <p class="checksum">SHA-256: {app.sha256}</p>
+  </section>
+</Base>
+
+<script>
+  const stage = document.getElementById('gallery-stage');
+  const thumbs = document.getElementById('gallery-thumbs');
+  const captionText = document.getElementById('gallery-caption-text');
+  const captionTag = document.getElementById('gallery-caption-tag');
+  const shotsData = JSON.parse(document.getElementById('shots-data')?.textContent || '[]');
+
+  thumbs?.querySelectorAll('.gallery-thumb').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = btn.getAttribute('data-thumb-index');
+      thumbs.querySelectorAll('.gallery-thumb').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      stage?.querySelectorAll('img').forEach((img) => {
+        img.classList.toggle('is-active', img.getAttribute('data-shot-index') === idx);
+      });
+      const shot = shotsData[Number(idx)];
+      if (shot && captionText && captionTag) {
+        captionText.innerHTML = `<h4>${shot.title}</h4><p>${shot.caption}</p>`;
+        captionTag.textContent = shot.section;
+      }
+    });
+  });
+</script>
+<script type="application/json" id="shots-data" set:html={JSON.stringify(app.screenshots)} />

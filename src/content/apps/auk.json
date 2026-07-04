@@ -1,0 +1,139 @@
+{
+  "name": "AUK",
+  "slug": "auk",
+  "tagline": "The API client that talks MCP back",
+  "category": "API Client",
+  "platform": "macOS",
+  "repo": "https://github.com/sandeepshekhar26/auk",
+  "releaseTag": "v0.1.0",
+  "downloadUrl": "https://github.com/sandeepshekhar26/auk/releases/download/v0.1.0/AUK.dmg",
+  "sizeBytes": 12658405,
+  "sha256": "74155716c644944e9be0677465549edd6a97dbdf89b0c06b88af693f7a0dd48c",
+  "requires": "macOS 10.13+ (Apple Silicon)",
+  "license": "Proprietary",
+  "author": { "name": "Sandy", "url": "https://github.com/sandeepshekhar26" },
+  "icon": "/icons/auk.png",
+  "hero": {
+    "eyebrow": "API client for macOS",
+    "headline": "The API client that talks MCP back",
+    "subhead": "AUK is a native, keyboard-first API client with k6 load testing, git-native YAML storage, and MCP built in both directions — an embedded MCP server so Claude Code can drive the app, and an MCP client debugger to inspect any MCP server's tools."
+  },
+  "pillars": [
+    {
+      "title": "Embedded MCP server",
+      "description": "Toggle it on and AUK exposes list_workspaces, list_requests, run_request, and run_perf_test over Streamable HTTP on a loopback port with a bearer token — so Claude Code can drive the app directly. Mutating requests still pop an in-app Allow/Deny prompt first.",
+      "snippet": "run_request(id=\"get-user\", env=\"staging\")"
+    },
+    {
+      "title": "MCP client debugger",
+      "description": "The mirror image of the server: connect to any MCP server over stdio or Streamable HTTP, browse its published tools, and test-invoke them with a JSON-Schema-driven form — like the official MCP Inspector, integrated into AUK.",
+      "snippet": "connect stdio:// ./my-server --inspect"
+    },
+    {
+      "title": "k6 load testing, built in",
+      "description": "Turn any saved request into a load test — executor, virtual users, duration, and SLA thresholds — without leaving the request you're editing. Results stream live (req/s, p95) and finish with a pass/fail verdict.",
+      "snippet": "k6 run --vus=3 --duration=5s get-user.js"
+    },
+    {
+      "title": "Git-native storage",
+      "description": "Every workspace is plain YAML under ~/.auk/workspace — a real git repo the whole time. Diff it, PR-review it, or commit and push right from the Git panel without dropping to a terminal.",
+      "snippet": "git commit -m \"add staging env vars\" && git push"
+    }
+  ],
+  "secondaryFeatures": [
+    "HTTP, WebSocket, SSE, GraphQL, and gRPC (unary, fully dynamic — no precompiled stubs)",
+    "Basic, Bearer, API Key, JWT, and OAuth2 (client credentials) auth",
+    "Import cURL, OpenAPI 3.x / Swagger 2.0, or a Postman Collection — auto-detected",
+    "Declarative assertions (status/time/header/JSON-path) enforced in GUI, CLI, and MCP alike",
+    "Sandboxed pre-request JavaScript — no filesystem, network, or process access",
+    "httptrace timing waterfall: DNS, connect, TLS, TTFB, redirects",
+    "Response diffing against the previous response, plus ⌘F search",
+    "System/Light/Dark theme with self-hosted Inter + JetBrains Mono fonts",
+    "Command palette (⌘K) for requests, history, import, theme, and settings",
+    "Headless CLI (apitool-cli) for CI smoke tests, using the same engine as the GUI"
+  ],
+  "positioningQuote": "Postman wants your account, Yaak quietly dropped its MCP server, Bruno stops at HTTP/GraphQL with no perf testing — AUK ships k6 load testing, a two-way MCP integration, and git-native YAML storage in one native macOS app, no login required.",
+  "installSteps": [
+    "Download AUK.dmg",
+    "Open the .dmg and drag AUK to Applications",
+    "Launch AUK — the app is signed and notarized, so Gatekeeper opens it without a warning"
+  ],
+  "fullFeatureList": [
+    {
+      "category": "Protocols & Auth",
+      "items": [
+        "HTTP, WebSocket, SSE, GraphQL, gRPC (unary, fully dynamic — no precompiled stubs)",
+        "Auth: Basic, Bearer, API Key, JWT, OAuth2 (client credentials)",
+        "Import: cURL, OpenAPI 3.x / Swagger 2.0 (JSON or YAML), Postman Collection v2.1 — auto-detected from pasted text"
+      ]
+    },
+    {
+      "category": "Scripting & Assertions",
+      "items": [
+        "Templating: {{ uuid }}, {{ timestamp.unix / unixMillis / iso8601 }}, {{ hash.md5/sha1/sha256(...) }}, {{ encode.base64/base64url(...) }}",
+        "Environment variables and request chaining (reference a previous response's JSON by path)",
+        "Pre-request scripting: sandboxed JavaScript (no filesystem/network/process access), read ctx.request, call ctx.setHeader(name, value), 2-second execution timeout",
+        "Assertions: status / responseTime / header / body-JSON-path, with eq/neq/contains/matches/lt/gt/exists/notExists",
+        "Assertions enforced identically in the GUI, the CLI (non-zero exit on failure), and over MCP"
+      ]
+    },
+    {
+      "category": "Performance Testing",
+      "items": [
+        "k6 executor + virtual users + duration configuration, next to the request you're editing",
+        "Live req/s and p95 chart while the test runs",
+        "SLA thresholds with an authoritative pass/fail verdict",
+        "k6 run as an arm's-length CLI sidecar (not linked into the app binary — a deliberate boundary given k6's AGPLv3 license)"
+      ]
+    },
+    {
+      "category": "MCP",
+      "items": [
+        "Embedded MCP server: Streamable HTTP, loopback + bearer token",
+        "Exposes list_workspaces, list_requests, run_request, run_perf_test",
+        "In-app Allow/Deny approval prompt gates mutating requests (POST/PUT/PATCH/DELETE) triggered over MCP",
+        "MCP client debugger: connect to any MCP server (stdio subprocess or Streamable HTTP)",
+        "Browse a connected server's published tools and test-invoke them with a JSON-Schema-driven form",
+        "Session history of MCP tool calls, with raw result and structured content shown side by side"
+      ]
+    },
+    {
+      "category": "Git & Storage",
+      "items": [
+        "Every workspace stored as plain, git-friendly YAML in ~/.auk/workspace — diffable and PR-reviewable",
+        "Git panel: branch, dirty state, changed files",
+        "Commit, and commit + push (if a remote is configured), without leaving the app",
+        "Headless CLI: apitool-cli run <requestID> --workspace-dir=DIR [--env=ENVIRONMENT_ID] — same engine as the GUI, exit code driven by assertions"
+      ]
+    },
+    {
+      "category": "Editor & UX",
+      "items": [
+        "Command palette (⌘K): jump to a request, browse history, import, switch theme, open settings",
+        "Keyboard shortcuts: ⌘N new request, ⌘B browse, ⌘, settings",
+        "Response viewer: theme-aware JSON syntax highlighting, ⌘F search, diff against the previous response, headers tab, timing/redirect tab",
+        "Request debugger: httptrace-level timing waterfall (DNS, connect, TLS handshake, TTFB, content download), redirect chain capture",
+        "Theme: System/Light/Dark, semantic CSS-variable tokens throughout, persisted to ~/.auk/settings.yaml",
+        "Self-hosted Inter (UI) and JetBrains Mono (code) fonts bundled with the app — no network fetch, no OS font fallback",
+        "Native macOS app built on Wails v2 — not a browser tab"
+      ]
+    }
+  ],
+  "screenshots": [
+    { "file": "hero-native.jpg", "title": "Empty native macOS window", "caption": "A native macOS app window titled AUK with traffic-light buttons and a left icon sidebar shows an empty Demo Workspace state with a centered hint reading ‘cmd+K to jump anywhere’ plus ‘cmd+N for a new request, cmd+B to browse.’", "section": "Native window" },
+    { "file": "request-response.jpg", "title": "Core request/response view", "caption": "A GET request to jsonplaceholder.typicode.com/users/1 shown in the light theme, with the sidebar rail and a pretty-printed JSON response body plus a 200 OK / 268ms / 509B status line.", "section": "Request & response" },
+    { "file": "dark-theme.jpg", "title": "Dark theme workspace", "caption": "The same layout in dark mode, showing the Assert tab with two green checkmarked assertions above the JSON response pane.", "section": "Theming" },
+    { "file": "theme-settings.jpg", "title": "Settings appearance panel", "caption": "The Settings dialog’s Appearance section with a System/Light/Dark toggle, persisted to ~/.auk/settings.yaml.", "section": "Theming" },
+    { "file": "timing-waterfall.jpg", "title": "Request timing waterfall", "caption": "The Timing tab shows a colored waterfall bar — DNS lookup, connecting, TLS handshake, TTFB, content download — with millisecond values, totaling 268ms.", "section": "Request debugger" },
+    { "file": "assertions.jpg", "title": "Passing request assertions", "caption": "The Assert tab with two configured checks (status equals 200, body JSON path contains a value) and an ‘ASSERTIONS PASSED 2/2’ banner.", "section": "Assertions" },
+    { "file": "scripting.jpg", "title": "Pre-request script editor", "caption": "The Script tab open with a one-line pre-request script setting a custom header before the request is sent.", "section": "Pre-request scripting" },
+    { "file": "perf-test-config.jpg", "title": "k6 load test configuration", "caption": "The Perf tab with executor, virtual users, and duration fields, plus SLA threshold rows for request duration and error rate.", "section": "k6 performance testing" },
+    { "file": "perf-test-results.jpg", "title": "Live load test results", "caption": "A live dual-line chart (req/s and p95) during a run, finishing with a PASSED banner and a full stats grid with both SLA thresholds checked.", "section": "k6 performance testing" },
+    { "file": "git-panel.jpg", "title": "Git workspace changes panel", "caption": "The Git panel on branch master showing changed files, a commit message box, and commit history — without leaving the app.", "section": "Git collaboration" },
+    { "file": "import.jpg", "title": "Import request dialog", "caption": "The Import modal accepting a pasted cURL command, OpenAPI/Swagger spec, or Postman collection — auto-detected.", "section": "Import" },
+    { "file": "mcp-server.jpg", "title": "MCP server settings panel", "caption": "A running MCP server at http://127.0.0.1:8724/mcp with a copyable ‘claude mcp add’ command and a Stop button.", "section": "Embedded MCP server" },
+    { "file": "mcp-client-tools.jpg", "title": "MCP client tool list", "caption": "The MCP sidebar listing a connected server’s four published tools, ready to browse and test-invoke.", "section": "MCP client debugger" },
+    { "file": "mcp-tool-result.jpg", "title": "MCP tool call result view", "caption": "Calling list_workspaces shows the raw result and structured content side by side, with a log of recent calls this session.", "section": "MCP client debugger" },
+    { "file": "command-palette.jpg", "title": "Command palette with actions", "caption": "⌘K opens a fuzzy command list — new request, browse history, import, theme, settings — reachable without the mouse.", "section": "Command palette" }
+  ]
+}

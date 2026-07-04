@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import AppCard from '../components/AppCard.astro';
+import { getCollection } from 'astro:content';
+
+const apps = await getCollection('apps');
+const auk = apps.find((a) => a.data.slug === 'auk')!.data;
+---
+<Base
+  title="Desktop app marketplace — native Mac apps built to be driven"
+  description="A small, curated store for native Mac desktop apps that are built to be driven — by you, or by your AI agent. Starting with AUK, a keyboard-first API client with built-in k6 load testing and a two-way MCP integration."
+>
+  <div class="hero">
+    <div class="hero-copy boot-item boot-1">
+      <p class="eyebrow">A catalog of agent-native desktop apps</p>
+      <h1>Native Mac apps.<br>Built to be driven&nbsp;—<br>not just clicked.</h1>
+      <p class="lede">No web wrappers, no cloud lock-in, no account walls. Every tool here ships as a real <code>.dmg</code>, and every one speaks MCP — so Claude, or any agent, can run it as fluently as you can.</p>
+      <div class="hero-actions">
+        <a class="btn btn-brass" href="/apps/auk">Get AUK &rarr;</a>
+        <a class="btn btn-ghost" href="#catalog">Browse the catalog</a>
+      </div>
+    </div>
+    <div class="device-wrap boot-item boot-3">
+      <div class="window">
+        <div class="window-bar">
+          <span class="dots"><i class="d-red"></i><i class="d-yellow"></i><i class="d-green"></i></span>
+          <span class="window-title">AUK — Get User Profile</span>
+          <span class="mcp-pill"><span class="dot dot-live"></span>MCP active</span>
+        </div>
+        <div class="window-body">
+          <aside class="win-sidebar">
+            <div class="win-req active"><b>GET</b><span>User Profile</span></div>
+            <div class="win-req"><b>POST</b><span>Create Order</span></div>
+            <div class="win-req"><b>GET</b><span>List Orders</span></div>
+            <div class="win-req"><b>WS</b><span>Live Feed</span></div>
+          </aside>
+          <div class="win-main">
+            <div class="win-urlbar">
+              <span class="method">GET</span>
+              <span class="url">https://api.example.com/v1/users/me</span>
+              <span class="send">Send</span>
+            </div>
+            <pre class="win-response"><code>{`{
+  `}<span class="k">"id"</span>{`: `}<span class="s">"usr_8f2a"</span>{`,
+  `}<span class="k">"name"</span>{`: `}<span class="s">"Ada Lovelace"</span>{`,
+  `}<span class="k">"active"</span>{`: `}<span class="n">true</span>{`,
+  `}<span class="k">"roles"</span>{`: [`}<span class="s">"admin"</span>{`]
+}`}</code></pre>
+            <div class="win-status"><span class="status-ok">200 OK</span> &middot; 84ms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="catalog" class="catalog">
+    <div class="catalog-head" data-reveal>
+      <h2>The catalog</h2>
+      <p class="catalog-count">1 app listed today &mdash; more in the oven</p>
+    </div>
+    <div class="dock-shelf" data-reveal-group>
+      <div data-reveal style="--reveal-index: 0">
+        <AppCard slug={auk.slug} name={auk.name} tagline={auk.tagline} icon={auk.icon} repo={auk.repo} releaseTag={auk.releaseTag} featured />
+      </div>
+      <div class="tile tile-ghost" data-reveal style="--reveal-index: 1"><span class="ghost-plus">+</span><span class="tile-name">Coming soon</span></div>
+      <div class="tile tile-ghost" data-reveal style="--reveal-index: 2"><span class="ghost-plus">+</span><span class="tile-name">Coming soon</span></div>
+      <div class="tile tile-ghost" data-reveal style="--reveal-index: 3"><span class="ghost-plus">+</span><span class="tile-name">Coming soon</span></div>
+    </div>
+  </section>
+</Base>

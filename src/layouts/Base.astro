@@ -1,0 +1,124 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+
+const appsCollection = await getCollection('apps');
+const catalogApps = appsCollection.map((a) => ({
+  name: a.data.name,
+  slug: a.data.slug,
+  tagline: a.data.tagline,
+  icon: a.data.icon,
+}));
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0f1218" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        var stored = localStorage.getItem('theme');
+        var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <Header />
+      <main>
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <span class="brand">Desktop app marketplace</span>
+        <p>A small, curated store for native Mac apps built to be driven — by you, or by your agent.</p>
+      </footer>
+    </div>
+    <CommandPalette apps={catalogApps} />
+    <script>
+      const toggle = document.getElementById('theme-toggle') as HTMLButtonElement | null;
+      let themeTransitionInFlight = false;
+      toggle?.addEventListener('click', (e) => {
+        if (themeTransitionInFlight) return;
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        const rect = toggle.getBoundingClientRect();
+        document.documentElement.style.setProperty('--theme-toggle-x', `${rect.left + rect.width / 2}px`);
+        document.documentElement.style.setProperty('--theme-toggle-y', `${rect.top + rect.height / 2}px`);
+
+        const apply = () => {
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        };
+
+        // @ts-ignore - startViewTransition is not yet in the TS DOM lib everywhere
+        if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          themeTransitionInFlight = true;
+          // @ts-ignore
+          const transition = document.startViewTransition(apply);
+          transition.finished.catch(() => {}).finally(() => {
+            themeTransitionInFlight = false;
+          });
+        } else {
+          apply();
+        }
+      });
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              io.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+      );
+      document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+        (el as HTMLElement).style.setProperty('--reveal-index', String(i % 6));
+        io.observe(el);
+      });
+    </script>
+    <script>
+      (function () {
+        const nodes = document.querySelectorAll('[data-dl-count]');
+        const cache = new Map<string, Promise<number | null>>();
+        nodes.forEach((el) => {
+          const repo = el.getAttribute('data-repo');
+          const tag = el.getAttribute('data-release-tag');
+          if (!repo || !tag) return;
+          const key = `${repo}@${tag}`;
+          if (!cache.has(key)) {
+            cache.set(
+              key,
+              fetch(`https://api.github.com/repos/${repo}/releases/tags/${tag}`)
+                .then((r) => (r.ok ? r.json() : null))
+                .then((d) => (d ? (d.assets || []).reduce((s: number, a: any) => s + (a.download_count || 0), 0) : null))
+                .catch(() => null)
+            );
+          }
+          cache.get(key)!.then((count) => {
+            if (count == null) return;
+            el.textContent = count.toLocaleString();
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

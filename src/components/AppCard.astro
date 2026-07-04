@@ -1,0 +1,24 @@
+---
+interface Props {
+  slug: string;
+  name: string;
+  tagline: string;
+  icon: string;
+  repo: string;
+  releaseTag: string;
+  featured?: boolean;
+}
+const { slug, name, tagline, icon, repo, releaseTag, featured = false } = Astro.props;
+const repoPath = repo.replace('https://github.com/', '');
+---
+<a class="tile tile-live" href={`/apps/${slug}`} data-app-slug={slug}>
+  {featured && <span class="tile-badge">Featured</span>}
+  <img class="tile-icon" src={icon} alt={`${name} icon`} />
+  <span class="tile-name">{name}</span>
+  <span class="tile-tag">{tagline}</span>
+  <span class="tile-meta">
+    <span class="dot dot-live"></span>
+    <span data-dl-count data-repo={repoPath} data-release-tag={releaseTag}>—</span>
+    downloads
+  </span>
+</a>
