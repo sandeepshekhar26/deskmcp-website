@@ -83,7 +83,7 @@ const galleryShots = app.screenshots.filter((s) => s.file !== heroShot.file);
     </div>
     <ScrollStack>
       {galleryShots.map((s, i) => (
-        <div class="scroll-stack-card stack-card">
+        <div class="scroll-stack-card stack-card" data-title={s.title} data-caption={s.caption} data-section={s.section}>
           <div class="stack-card-media">
             <img src={`/screenshots/${app.slug}/${s.file}`} alt={`${app.name} — ${s.title}`} loading={i < 2 ? 'eager' : 'lazy'} />
           </div>

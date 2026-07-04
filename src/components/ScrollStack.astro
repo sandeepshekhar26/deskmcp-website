@@ -1,8 +1,10 @@
 ---
 // Vanilla port of the React Bits <ScrollStack /> — cards pin & stack as you
 // scroll a contained region. Framework-free for the Astro static site.
-// Progressive enhancement: without JS (or under reduced-motion) the same markup
-// is just a normal vertical scroll list.
+// Contained-frame tweaks vs the original: the stack stays pinned at the end
+// (no "release" that empties the frame), and a caption bar below the frame
+// tracks the current card. Progressive enhancement: without JS / under
+// reduced-motion the same markup is a plain vertical scroll list.
 interface Props {
   class?: string;
   itemDistance?: number;
@@ -18,28 +20,40 @@ const {
   class: className = '',
   itemDistance = 40,
   itemScale = 0.02,
-  itemStackDistance = 24,
-  stackPosition = '18%',
+  itemStackDistance = 26,
+  stackPosition = '20%',
   scaleEndPosition = '8%',
-  baseScale = 0.86,
+  baseScale = 0.87,
   rotationAmount = 0,
   blurAmount = 2,
 } = Astro.props;
 ---
-<div
-  class:list={['scroll-stack-scroller', className]}
-  data-item-distance={itemDistance}
-  data-item-scale={itemScale}
-  data-item-stack-distance={itemStackDistance}
-  data-stack-position={stackPosition}
-  data-scale-end-position={scaleEndPosition}
-  data-base-scale={baseScale}
-  data-rotation-amount={rotationAmount}
-  data-blur-amount={blurAmount}
->
-  <div class="scroll-stack-inner">
-    <slot />
-    <div class="scroll-stack-end"></div>
+<div class="scroll-stack-wrap">
+  <div
+    class:list={['scroll-stack-scroller', className]}
+    data-item-distance={itemDistance}
+    data-item-scale={itemScale}
+    data-item-stack-distance={itemStackDistance}
+    data-stack-position={stackPosition}
+    data-scale-end-position={scaleEndPosition}
+    data-base-scale={baseScale}
+    data-rotation-amount={rotationAmount}
+    data-blur-amount={blurAmount}
+  >
+    <div class="scroll-stack-inner">
+      <slot />
+      <div class="scroll-stack-end"></div>
+    </div>
+  </div>
+  <div class="stack-caption" data-stack-caption>
+    <div class="stack-caption-text">
+      <h4></h4>
+      <p></p>
+    </div>
+    <div class="stack-caption-meta">
+      <span class="stack-caption-tag"></span>
+      <span class="stack-caption-count"></span>
+    </div>
   </div>
 </div>
 
@@ -51,40 +65,50 @@ const {
     const cards = Array.from(scroller.querySelectorAll<HTMLElement>('.scroll-stack-card'));
     if (!cards.length) return;
 
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
-      // Leave the plain vertical scroll list as-is; no pinning, no smooth scroll.
-      return;
+    const wrap = scroller.closest('.scroll-stack-wrap') as HTMLElement | null;
+    const captionEl = wrap?.querySelector<HTMLElement>('[data-stack-caption]') || null;
+    const capTitle = captionEl?.querySelector('h4') || null;
+    const capText = captionEl?.querySelector('p') || null;
+    const capTag = captionEl?.querySelector('.stack-caption-tag') || null;
+    const capCount = captionEl?.querySelector('.stack-caption-count') || null;
+
+    function setCaption(i: number) {
+      const card = cards[i];
+      if (!card) return;
+      if (capTitle) capTitle.textContent = card.dataset.title || '';
+      if (capText) capText.textContent = card.dataset.caption || '';
+      if (capTag) capTag.textContent = card.dataset.section || '';
+      if (capCount) capCount.textContent = `${i + 1} / ${cards.length}`;
     }
+    setCaption(0);
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return; // plain vertical list, per-card captions shown via CSS
+
     (scroller as any).__ssInit = true;
     scroller.classList.add('ss-active');
+    if (wrap) wrap.classList.add('ss-on');
 
     const d = scroller.dataset;
     const itemDistance = parseFloat(d.itemDistance || '40');
     const itemScale = parseFloat(d.itemScale || '0.02');
-    const itemStackDistance = parseFloat(d.itemStackDistance || '24');
-    const stackPosition = d.stackPosition || '18%';
+    const itemStackDistance = parseFloat(d.itemStackDistance || '26');
+    const stackPosition = d.stackPosition || '20%';
     const scaleEndPosition = d.scaleEndPosition || '8%';
-    const baseScale = parseFloat(d.baseScale || '0.86');
+    const baseScale = parseFloat(d.baseScale || '0.87');
     const rotationAmount = parseFloat(d.rotationAmount || '0');
     const blurAmount = parseFloat(d.blurAmount || '2');
 
     const inner = scroller.querySelector<HTMLElement>('.scroll-stack-inner')!;
-    const endEl = scroller.querySelector<HTMLElement>('.scroll-stack-end');
     const lastTransforms = new Map<number, any>();
     let isUpdating = false;
+    let activeIndex = -1;
     let lenis: any = null;
 
-    const calcProgress = (scrollTop: number, start: number, end: number) => {
-      if (scrollTop < start) return 0;
-      if (scrollTop > end) return 1;
-      return (scrollTop - start) / (end - start);
-    };
-    const parsePct = (value: string, h: number) => {
-      if (typeof value === 'string' && value.includes('%')) return (parseFloat(value) / 100) * h;
-      return parseFloat(value);
-    };
+    const parsePct = (value: string, h: number) =>
+      typeof value === 'string' && value.includes('%') ? (parseFloat(value) / 100) * h : parseFloat(value);
     const offsetTop = (el: HTMLElement) => el.offsetTop;
+    const calcProgress = (s: number, a: number, b: number) => (s < a ? 0 : s > b ? 1 : (s - a) / (b - a));
 
     function update() {
       if (!cards.length || isUpdating) return;
@@ -94,7 +118,17 @@ const {
       const containerHeight = scroller.clientHeight;
       const stackPositionPx = parsePct(stackPosition, containerHeight);
       const scaleEndPositionPx = parsePct(scaleEndPosition, containerHeight);
-      const endElementTop = endEl ? offsetTop(endEl) : 0;
+
+      // The card currently on top of the stack (highest one whose pin has begun).
+      let topCardIndex = 0;
+      for (let j = 0; j < cards.length; j++) {
+        const jTop = offsetTop(cards[j]);
+        if (scrollTop >= jTop - stackPositionPx - itemStackDistance * j) topCardIndex = j;
+      }
+      if (topCardIndex !== activeIndex) {
+        activeIndex = topCardIndex;
+        setCaption(activeIndex);
+      }
 
       cards.forEach((card, i) => {
         if (!card) return;
@@ -102,7 +136,6 @@ const {
         const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
         const triggerEnd = cardTop - scaleEndPositionPx;
         const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
-        const pinEnd = endElementTop - containerHeight / 2;
 
         const scaleProgress = calcProgress(scrollTop, triggerStart, triggerEnd);
         const targetScale = baseScale + i * itemScale;
@@ -110,20 +143,11 @@ const {
         const rotation = rotationAmount ? i * rotationAmount * scaleProgress : 0;
 
         let blur = 0;
-        if (blurAmount) {
-          let topCardIndex = 0;
-          for (let j = 0; j < cards.length; j++) {
-            const jCardTop = offsetTop(cards[j]);
-            const jTriggerStart = jCardTop - stackPositionPx - itemStackDistance * j;
-            if (scrollTop >= jTriggerStart) topCardIndex = j;
-          }
-          if (i < topCardIndex) blur = Math.max(0, (topCardIndex - i) * blurAmount);
-        }
+        if (blurAmount && i < topCardIndex) blur = Math.max(0, (topCardIndex - i) * blurAmount);
 
-        let translateY = 0;
-        const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
-        if (isPinned) translateY = scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
-        else if (scrollTop > pinEnd) translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
+        // Contained frame: once pinned, STAY pinned (no release) so the frame
+        // never empties out at the end.
+        const translateY = scrollTop >= pinStart ? scrollTop - cardTop + stackPositionPx + itemStackDistance * i : 0;
 
         const nt = {
           translateY: Math.round(translateY * 100) / 100,
@@ -169,9 +193,9 @@ const {
         syncTouchLerp: 0.075,
       });
     } catch (e) {
-      // Fall back to the plain scroll list if lenis can't start.
       console.warn('ScrollStack: lenis init failed, using plain list.', e);
       scroller.classList.remove('ss-active');
+      if (wrap) wrap.classList.remove('ss-on');
       (scroller as any).__ssInit = false;
       cards.forEach((c) => { c.style.marginBottom = ''; });
       return;
@@ -182,7 +206,6 @@ const {
       requestAnimationFrame(raf);
     };
     requestAnimationFrame(raf);
-    // Also update on native scroll as a safety net for the pin math.
     scroller.addEventListener('scroll', update, { passive: true });
     update();
   }

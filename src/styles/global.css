@@ -1097,10 +1097,13 @@ kbd {
 }
 
 /* ---------- scroll-stack screenshot navigator ---------- */
+.scroll-stack-wrap {
+  position: relative;
+}
 .scroll-stack-scroller {
   position: relative;
   width: 100%;
-  height: min(78vh, 760px);
+  height: min(72vh, 620px);
   overflow-y: auto;
   overflow-x: visible;
   overscroll-behavior: contain;
@@ -1126,7 +1129,7 @@ kbd {
 }
 /* JS adds .ss-active once the stacking effect is running. */
 .scroll-stack-scroller.ss-active .scroll-stack-inner {
-  padding: 9rem 1.5rem 26rem;
+  padding: 9rem 1.25rem 5rem;
 }
 .scroll-stack-end {
   width: 100%;
@@ -1149,9 +1152,57 @@ kbd {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  max-height: 46vh;
+  max-height: 42vh;
   background: var(--panel-2);
   overflow: hidden;
+}
+/* When stacking is active, the caption lives in the bar below the frame. */
+.scroll-stack-wrap.ss-on .stack-card-cap {
+  display: none;
+}
+
+/* Persistent caption bar below the frame — updates as you scroll. */
+.stack-caption {
+  display: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0 0.25rem;
+  min-height: 3.2rem;
+}
+.scroll-stack-wrap.ss-on .stack-caption {
+  display: flex;
+}
+.stack-caption-text h4 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+.stack-caption-text p {
+  font-size: 0.85rem;
+  color: var(--mist);
+  line-height: 1.5;
+  max-width: 64ch;
+}
+.stack-caption-meta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+.stack-caption-tag {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--brass);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.stack-caption-count {
+  font-size: 0.75rem;
+  color: var(--mist);
+  font-variant-numeric: tabular-nums;
 }
 .stack-card-media img {
   width: 100%;
