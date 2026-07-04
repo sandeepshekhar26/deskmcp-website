@@ -19,13 +19,15 @@ interface Props {
 const {
   class: className = '',
   itemDistance = 40,
-  itemScale = 0.02,
-  itemStackDistance = 26,
-  stackPosition = '20%',
-  scaleEndPosition = '8%',
-  baseScale = 0.87,
+  itemScale = 0.015,
+  // Tight stack offset so every card — including the last — stays inside the
+  // contained frame instead of being pushed below it.
+  itemStackDistance = 12,
+  stackPosition = '9%',
+  scaleEndPosition = '5%',
+  baseScale = 0.9,
   rotationAmount = 0,
-  blurAmount = 2,
+  blurAmount = 1.5,
 } = Astro.props;
 ---
 <div class="scroll-stack-wrap">
@@ -91,11 +93,11 @@ const {
 
     const d = scroller.dataset;
     const itemDistance = parseFloat(d.itemDistance || '40');
-    const itemScale = parseFloat(d.itemScale || '0.02');
-    const itemStackDistance = parseFloat(d.itemStackDistance || '26');
-    const stackPosition = d.stackPosition || '20%';
-    const scaleEndPosition = d.scaleEndPosition || '8%';
-    const baseScale = parseFloat(d.baseScale || '0.87');
+    const itemScale = parseFloat(d.itemScale || '0.015');
+    const itemStackDistance = parseFloat(d.itemStackDistance || '12');
+    const stackPosition = d.stackPosition || '9%';
+    const scaleEndPosition = d.scaleEndPosition || '5%';
+    const baseScale = parseFloat(d.baseScale || '0.9');
     const rotationAmount = parseFloat(d.rotationAmount || '0');
     const blurAmount = parseFloat(d.blurAmount || '2');
 

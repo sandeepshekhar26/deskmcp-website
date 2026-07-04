@@ -1129,7 +1129,7 @@ kbd {
 }
 /* JS adds .ss-active once the stacking effect is running. */
 .scroll-stack-scroller.ss-active .scroll-stack-inner {
-  padding: 9rem 1.25rem 5rem;
+  padding: 3.5rem 1.25rem 4rem;
 }
 .scroll-stack-end {
   width: 100%;
@@ -1152,7 +1152,7 @@ kbd {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  max-height: 42vh;
+  max-height: 40vh;
   background: var(--panel-2);
   overflow: hidden;
 }
