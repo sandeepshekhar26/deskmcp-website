@@ -22,10 +22,10 @@ const {
   itemScale = 0.015,
   // Tight stack offset so every card — including the last — stays inside the
   // contained frame instead of being pushed below it.
-  itemStackDistance = 12,
-  stackPosition = '9%',
-  scaleEndPosition = '5%',
-  baseScale = 0.9,
+  itemStackDistance = 6,
+  stackPosition = '4%',
+  scaleEndPosition = '3%',
+  baseScale = 0.92,
   rotationAmount = 0,
   blurAmount = 1.5,
 } = Astro.props;
@@ -94,10 +94,10 @@ const {
     const d = scroller.dataset;
     const itemDistance = parseFloat(d.itemDistance || '40');
     const itemScale = parseFloat(d.itemScale || '0.015');
-    const itemStackDistance = parseFloat(d.itemStackDistance || '12');
-    const stackPosition = d.stackPosition || '9%';
-    const scaleEndPosition = d.scaleEndPosition || '5%';
-    const baseScale = parseFloat(d.baseScale || '0.9');
+    const itemStackDistance = parseFloat(d.itemStackDistance || '6');
+    const stackPosition = d.stackPosition || '4%';
+    const scaleEndPosition = d.scaleEndPosition || '3%';
+    const baseScale = parseFloat(d.baseScale || '0.92');
     const rotationAmount = parseFloat(d.rotationAmount || '0');
     const blurAmount = parseFloat(d.blurAmount || '2');
 
@@ -140,7 +140,9 @@ const {
         const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
 
         const scaleProgress = calcProgress(scrollTop, triggerStart, triggerEnd);
-        const targetScale = baseScale + i * itemScale;
+        // Clamp to 1 so front (high-index) cards never scale *up* past full size
+        // and overflow the frame — they only ever shrink as they recede.
+        const targetScale = Math.min(1, baseScale + i * itemScale);
         const scale = 1 - scaleProgress * (1 - targetScale);
         const rotation = rotationAmount ? i * rotationAmount * scaleProgress : 0;
 

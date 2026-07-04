@@ -1099,11 +1099,12 @@ kbd {
 /* ---------- scroll-stack screenshot navigator ---------- */
 .scroll-stack-wrap {
   position: relative;
+  max-width: 720px;
 }
 .scroll-stack-scroller {
   position: relative;
   width: 100%;
-  height: min(72vh, 620px);
+  height: 520px;
   overflow-y: auto;
   overflow-x: visible;
   overscroll-behavior: contain;
@@ -1129,7 +1130,7 @@ kbd {
 }
 /* JS adds .ss-active once the stacking effect is running. */
 .scroll-stack-scroller.ss-active .scroll-stack-inner {
-  padding: 3.5rem 1.25rem 4rem;
+  padding: 2rem 2.25rem 3rem;
 }
 .scroll-stack-end {
   width: 100%;
@@ -1151,8 +1152,7 @@ kbd {
 .stack-card-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  max-height: 40vh;
+  aspect-ratio: 794 / 496; /* exact screenshot ratio → full image, no crop */
   background: var(--panel-2);
   overflow: hidden;
 }
